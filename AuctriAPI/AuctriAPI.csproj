@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>67c29d46-b72d-4bc3-95ed-8b78232e8d79</UserSecretsId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.2" />
+    <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.6.0" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols" Version="8.6.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuctriAPI.Application\AuctriAPI.Application.csproj" />
+    <ProjectReference Include="..\AuctriAPI.Infrastructure\AuctriAPI.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
