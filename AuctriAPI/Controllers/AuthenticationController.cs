@@ -11,7 +11,7 @@ public class AuthenticationController(IAuthenticationService authenticationServi
 {
     private readonly IAuthenticationService _authenticationService = authenticationService;
 
-        [HttpPost("register")]
+    [HttpPost("register")]
     public IActionResult Register(RegisterRequest request)
     {
         // Implementation
@@ -20,7 +20,7 @@ public class AuthenticationController(IAuthenticationService authenticationServi
             request.LastName,
             request.Email,
             request.Password
-            );
+        );
 
         var response = new AuthenticationResult(
             authResult.Id,
@@ -28,7 +28,7 @@ public class AuthenticationController(IAuthenticationService authenticationServi
             authResult.LastName,
             authResult.Email,
             authResult.Token
-            );
+        );
 
         return Ok(response);
     }
@@ -40,7 +40,7 @@ public class AuthenticationController(IAuthenticationService authenticationServi
         var authResult = _authenticationService.Login(
             request.Email,
             request.Password
-            );
+        );
 
         var response = new AuthenticationResult(
             authResult.Id,
@@ -48,10 +48,10 @@ public class AuthenticationController(IAuthenticationService authenticationServi
             authResult.LastName,
             authResult.Email,
             authResult.Token
-            );
+        );
         return Ok(response);
     }
-    
+
     [HttpGet("test"), Authorize]
     public IActionResult Test()
     {

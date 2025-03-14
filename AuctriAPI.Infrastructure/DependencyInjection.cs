@@ -1,9 +1,16 @@
 ﻿using System.Text;
 using AuctriAPI.Application.Common.Interfaces.Authentication;
+using AuctriAPI.Application.Common.Interfaces.Persistence;
+using AuctriAPI.Application.Common.Interfaces.Security;
 using AuctriAPI.Application.Services.DateTime;
 using AuctriAPI.Infrastructure.Authentication;
+using AuctriAPI.Infrastructure.Persistence;
+using AuctriAPI.Infrastructure.Repository;
+using AuctriAPI.Infrastructure.Security;
 using AuctriAPI.Infrastructure.Services.DateTime;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
@@ -16,10 +23,23 @@ public static class DependencyInjection
         this IServiceCollection services,
         ConfigurationManager builderConfiguration)
     {
+        // Database
+        services.AddDbContext<AuctriDbContext>(options =>
+            options.UseSqlite(
+                builderConfiguration.GetConnectionString("DBConnection"),
+                b => b.MigrationsAssembly(typeof(AuctriDbContext).Assembly.FullName)));
+        
+        // Authentication and Token Generation
         services.AddAuth(builderConfiguration);
+        
+        // Repositories
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        
         services.Configure<JwtSettings>(builderConfiguration.GetSection(JwtSettings.SectionName));
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        
         return services;
     }
 
