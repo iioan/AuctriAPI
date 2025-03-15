@@ -4,6 +4,7 @@ using AuctriAPI.Application.Common.Interfaces.Security;
 using AuctriAPI.Application.Services.DateTime;
 using AuctriAPI.Core.Constants;
 using AuctriAPI.Core.Entitites;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuctriAPI.Application.Services.Authentication;
 
@@ -11,51 +12,63 @@ public class AuthenticationService(
     IJwtTokenGenerator jwtTokenGenerator,
     IUserRepository userRepository,
     IPasswordHasher passwordHasher,
-    IDateTimeProvider dateTimeProvider) : IAuthenticationService
+    IDateTimeProvider dateTimeProvider,
+    SignInManager<User> signInManager) : IAuthenticationService
 {
     private readonly IJwtTokenGenerator _jwtTokenGenerator = jwtTokenGenerator;
     private readonly IUserRepository _userRepository = userRepository;
     private readonly IPasswordHasher _passwordHasher = passwordHasher;
     private readonly IDateTimeProvider _dateTimeProvider = dateTimeProvider;
+    private readonly SignInManager<User> _signInManager = signInManager;
 
-    public AuthenticationResult Login(string email, string password)
+    public async Task<AuthenticationResult> LoginAsync(string email, string password)
     {
-        var user = _userRepository.GetUserByEmail(email);
+        var user = await _userRepository.GetUserByEmailAsync(email);
         if (user == null)
             throw new Exception("User not found");
 
-        if (!_passwordHasher.VerifyPassword(password, user.PasswordHash))
-            throw new Exception("Invalid password");
-        
+        // Validate password using SignInManager (handles lockouts, etc.)
+        var result = await _signInManager.CheckPasswordSignInAsync(user, password, true);
+        if (!result.Succeeded)
+        {
+            throw new Exception("Invalid credentials");
+        }
+
         var token = _jwtTokenGenerator.GenerateToken(user.Id, user.FirstName, user.LastName);
-        return new AuthenticationResult(Guid.NewGuid(), user.FirstName, user.LastName, email, token);
+        return new AuthenticationResult(
+            user.Id,
+            user.FirstName,
+            user.LastName,
+            user.Email!,
+            token);
     }
 
-    public AuthenticationResult Register(string firstName, string lastName, string email, string password)
+    public async Task<AuthenticationResult> RegisterAsync(string firstName, string lastName, string email, string password)
     {
         // check if user alr exists
-        if (_userRepository.UserExists(email))
+        if (await _userRepository.UserExistsAsync(email))
             throw new Exception("User already exists");
 
         // create user (generate unique Guid)
-        string username = email.Split('@')[0];
-        // create JWT token
         var user = new User
         {
             Id = Guid.NewGuid(),
             FirstName = firstName,
             LastName = lastName,
             Email = email,
-            Username = username,
-            PasswordHash = _passwordHasher.HashPassword(password),
+            UserName = email, // Using email as username, can be changed
             Role = UserRole.User,
             CreatedDateTime = _dateTimeProvider.UtcNow.DateTime,
             UpdatedDateTime = _dateTimeProvider.UtcNow.DateTime
         };
 
         // Persist to DB
-        _userRepository.Add(user);
-
+        var result = await _userRepository.AddAsync(user, password);
+        if (!result.Succeeded)
+        {
+            throw new Exception($"Failed to create user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+        }
+        
         // Generate JWT token
         var token = _jwtTokenGenerator.GenerateToken(user.Id, user.FirstName, user.LastName);
 

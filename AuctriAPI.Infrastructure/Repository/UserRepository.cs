@@ -1,31 +1,32 @@
 ﻿using AuctriAPI.Application.Common.Interfaces.Persistence;
 using AuctriAPI.Core.Entitites;
 using AuctriAPI.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Identity;
 
 namespace AuctriAPI.Infrastructure.Repository;
 
-public class UserRepository(AuctriDbContext dbContext) : IUserRepository
+public class UserRepository(UserManager<User> userManager) : IUserRepository
 {
-    private readonly AuctriDbContext _dbContext = dbContext;
+    private readonly UserManager<User> _userManager = userManager;
 
-    public User? GetUserByEmail(string email)
+    public async Task<User?> GetUserByEmailAsync(string email)
     {
-        return _dbContext.Users.SingleOrDefault(u => u.Email == email);
+        return await _userManager.FindByEmailAsync(email);
     }
 
-    public User? GetUserById(Guid id)
+    public async Task<User?> GetUserByIdAsync(Guid id)
     {
-        return _dbContext.Users.Find(id);
+        return await _userManager.FindByIdAsync(id.ToString());
     }
 
-    public void Add(User user)
+    public async Task<IdentityResult> AddAsync(User user, string password)
     {
-        _dbContext.Users.Add(user);
-        _dbContext.SaveChanges();
+        return await _userManager.CreateAsync(user, password);
     }
 
-    public bool UserExists(string email)
+    public async Task<bool> UserExistsAsync(string email)
     {
-        return _dbContext.Users.Any(u => u.Email == email);
+        var user = await _userManager.FindByEmailAsync(email);
+        return user != null;
     }
 }

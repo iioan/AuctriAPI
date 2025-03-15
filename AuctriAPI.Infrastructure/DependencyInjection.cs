@@ -3,6 +3,7 @@ using AuctriAPI.Application.Common.Interfaces.Authentication;
 using AuctriAPI.Application.Common.Interfaces.Persistence;
 using AuctriAPI.Application.Common.Interfaces.Security;
 using AuctriAPI.Application.Services.DateTime;
+using AuctriAPI.Core.Entitites;
 using AuctriAPI.Infrastructure.Authentication;
 using AuctriAPI.Infrastructure.Persistence;
 using AuctriAPI.Infrastructure.Repository;
@@ -28,18 +29,39 @@ public static class DependencyInjection
             options.UseSqlite(
                 builderConfiguration.GetConnectionString("DBConnection"),
                 b => b.MigrationsAssembly(typeof(AuctriDbContext).Assembly.FullName)));
-        
+
+        // Identity
+        services.AddIdentity<User, IdentityRole<Guid>>(options =>
+            {
+                // Configure password requirements
+                // options.Password.RequiredLength = 8;
+                // options.Password.RequireDigit = true;
+                // options.Password.RequireLowercase = true;
+                // options.Password.RequireUppercase = true;
+                // options.Password.RequireNonAlphanumeric = true;
+
+                // Configure user requirements
+                options.User.RequireUniqueEmail = true;
+
+                // Configure lockout
+                // options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(15);
+                // options.Lockout.MaxFailedAccessAttempts = 5;
+            })
+            .AddEntityFrameworkStores<AuctriDbContext>()
+            .AddDefaultTokenProviders();
+
+
         // Authentication and Token Generation
         services.AddAuth(builderConfiguration);
-        
+
         // Repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
-        
+
         services.Configure<JwtSettings>(builderConfiguration.GetSection(JwtSettings.SectionName));
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
-        
+
         return services;
     }
 

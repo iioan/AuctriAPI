@@ -1,8 +1,7 @@
-﻿namespace AuctriAPI.Application.Services.Authentication; 
-    
+﻿namespace AuctriAPI.Application.Services.Authentication;
+
 public interface IAuthenticationService
 {
-    AuthenticationResult Login(string email, string password);
-    AuthenticationResult Register(string firstName, string lastName, string email, string password);
+    Task<AuthenticationResult> LoginAsync(string email, string password);
+    Task<AuthenticationResult> RegisterAsync(string firstName, string lastName, string email, string password);
 }
-
