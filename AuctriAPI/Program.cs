@@ -3,9 +3,23 @@ using AuctriAPI.Application;
 using AuctriAPI.Infrastructure;
 using FluentValidation;
 using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policyBuilder =>
+    {
+        policyBuilder
+            .WithOrigins("http://localhost:3000", "https://localhost:3000") // Allow both HTTP and HTTPS
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -52,6 +66,13 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"Request path: {context.Request.Path}");
+    await next();
+    Console.WriteLine($"Response status: {context.Response.StatusCode}");
+});
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -63,8 +84,12 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
+app.UseDeveloperExceptionPage();    
+// app.UseRouting();
+app.UseCors("AllowFrontend");  // Move it AFTER routing but BEFORE auth middleware
+// app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapControllers();
 app.Run();

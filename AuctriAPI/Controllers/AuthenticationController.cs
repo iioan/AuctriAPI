@@ -39,6 +39,7 @@ public class AuthenticationController(IAuthenticationService authenticationServi
         );
 
         var response = _mapper.Map<AuthenticationResponse>(authResult);
+        Console.WriteLine(authResult.Token);
         return Ok(response);
     }
 
@@ -46,5 +47,11 @@ public class AuthenticationController(IAuthenticationService authenticationServi
     public IActionResult Test()
     {
         return Ok("Test");
+    }
+    
+    [HttpGet("test-no-auth")]
+    public IActionResult TestNoAuth()
+    {
+        return Ok("Test Without Auth");
     }
 }
