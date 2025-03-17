@@ -84,10 +84,8 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseDeveloperExceptionPage();    
-// app.UseRouting();
-app.UseCors("AllowFrontend");  // Move it AFTER routing but BEFORE auth middleware
-// app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -48,8 +48,8 @@ public static class DependencyInjection
                 // options.Lockout.MaxFailedAccessAttempts = 5;
             })
             .AddEntityFrameworkStores<AuctriDbContext>()
-            .AddDefaultTokenProviders();
-
+            .AddDefaultTokenProviders()
+            .AddSignInManager<SignInManager<User>>();
 
         // Authentication and Token Generation
         services.AddAuth(builderConfiguration);
@@ -72,7 +72,13 @@ public static class DependencyInjection
         services.Configure<JwtSettings>(builderConfiguration.GetSection(JwtSettings.SectionName));
         services.AddSingleton<IJwtTokenGenerator, JwtTokenGenerator>();
 
-        services.AddAuthentication(defaultScheme: JwtBearerDefaults.AuthenticationScheme)
+        services
+            .AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
             .AddJwtBearer(options => options.TokenValidationParameters = new TokenValidationParameters
             {
                 ValidateIssuer = true,
@@ -84,6 +90,7 @@ public static class DependencyInjection
                 IssuerSigningKey = new SymmetricSecurityKey(
                     Encoding.UTF8.GetBytes(builderConfiguration.GetSection(JwtSettings.SectionName)["Secret"]!))
             });
+
         return services;
     }
 }
