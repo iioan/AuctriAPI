@@ -1,6 +1,8 @@
-﻿using AuctriAPI.Application.Services.Authentication;
+﻿using System.Security.Claims;
+using AuctriAPI.Application.Services.Authentication;
 using AuctriAPI.Contracts.Authentication;
 using AutoMapper;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,12 +45,14 @@ public class AuthenticationController(IAuthenticationService authenticationServi
         return Ok(response);
     }
 
-    [HttpGet("test"), Authorize]
+    [HttpGet("test")]
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
     public IActionResult Test()
     {
-        return Ok("Test");
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        return Ok($"Authenticated user ID: {userId}");
     }
-    
+
     [HttpGet("test-no-auth")]
     public IActionResult TestNoAuth()
     {
