@@ -1,4 +1,4 @@
-﻿using AuctriAPI.Application.Services.Authentication;
+﻿using AuctriAPI.Application.Common.Entities;
 using AuctriAPI.Contracts.Authentication;
 using AuctriAPI.Core.Entitites;
 using AutoMapper;

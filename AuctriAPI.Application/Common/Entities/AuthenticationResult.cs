@@ -1,4 +1,4 @@
-﻿namespace AuctriAPI.Application.Services.Authentication; 
+﻿namespace AuctriAPI.Application.Common.Entities; 
     
 public record AuthenticationResult (
     Guid Id,
