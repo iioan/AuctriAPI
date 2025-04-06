@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using AuctriAPI.Application.Features.Authentication.Commands.Login;
 using AuctriAPI.Application.Features.Authentication.Commands.Register;
 using AuctriAPI.Contracts.Authentication;
